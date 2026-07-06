@@ -1,0 +1,111 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  ogImage?: string;
+  jsonLd?: Record<string, unknown>[];
+}
+
+const {
+  title,
+  description = '半路手记 — 一个没有技术背景的人，用 AI 真刀真枪做出东西的全过程记录。',
+  ogImage = '/og-default.svg',
+  jsonLd = [],
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+const siteOrigin = Astro.url.origin;
+const fullTitle = title === '首页' ? '半路手记' : `${title} | 半路手记`;
+
+// 默认 JSON-LD（WebSite + Organization）
+const defaultLd: Record<string, unknown>[] = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: '半路手记',
+    url: siteOrigin,
+    description: '一个没有技术背景的人，用 AI 真刀真枪做出东西的全过程记录。',
+    inLanguage: 'zh-CN',
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: '安远',
+    url: siteOrigin,
+    description: '非程序员，用 AI 完成小说、音乐、网站、电子书等项目。',
+    sameAs: [
+      `${siteOrigin}/about/`,
+      'https://bsda.com.cn',
+    ],
+  },
+];
+
+const allLd = jsonLd.length > 0 ? jsonLd : defaultLd;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalURL} />
+
+    <!-- Dark mode FOUC fix -->
+    <script is:inline>
+      (function(){var t=localStorage.getItem('theme');if(t==='dark'||(!t&&window.matchMedia('(prefers-color-scheme:dark)').matches)){document.documentElement.classList.add('dark')}})();
+    </script>
+
+    <!-- Open Graph -->
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalURL} />
+    <meta property="og:site_name" content="半路手记" />
+    <meta property="og:image" content={new URL(ogImage, Astro.site)} />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={new URL(ogImage, Astro.site)} />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <title>{fullTitle}</title>
+
+    <!-- JSON-LD -->
+    {allLd.map((ld) => (
+      <script type="application/ld+json" set:html={JSON.stringify(ld)} />
+    ))}
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <a href="/" class="site-title">半路手记</a>
+        <nav class="site-nav">
+          <a href="/projects/">做了啥</a>
+          <a href="/howto/">怎么干的</a>
+          <a href="/pitfalls/">踩坑了</a>
+          <a href="/thoughts/">想一想</a>
+          <a href="/about/">关于</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <p>半路手记 &copy; 2026 安远 &middot; <a href="https://bsda.com.cn">文学作品</a> &middot; <a href="https://github.com/toplee36910-hub/banlu-shouji" target="_blank" rel="noopener">GitHub</a></p>
+      </div>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection('pitfalls');
+const sorted = entries.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+---
+
+<BaseLayout title="踩坑了">
+  <h1 class="category-title">踩坑了 — 排障记录、部署踩坑、调试经验</h1>
+  <ul class="article-list">
+    {sorted.map((entry) => (
+      <li class="article-item">
+        <h2><a href={`/pitfalls/${entry.id}`}>{entry.data.title}</a></h2>
+        <div class="article-meta">
+          {entry.data.date.toISOString().split('T')[0]}
+          {entry.data.tags?.map(t => <span class="tag">{t}</span>)}
+        </div>
+        <p class="article-summary">{entry.data.summary}</p>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>

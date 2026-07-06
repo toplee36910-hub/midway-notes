@@ -1,0 +1,120 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const categories = [
+  { name: '做了啥', slug: 'projects', desc: '完整项目交付复盘，有数据有时间线', icon: 'projects' },
+  { name: '怎么干的', slug: 'howto', desc: '端到端工作流、方法论、工具拆解', icon: 'howto' },
+  { name: '踩坑了', slug: 'pitfalls', desc: '排障记录、部署踩坑、调试经验', icon: 'pitfalls' },
+  { name: '想一想', slug: 'thoughts', desc: 'AI 观点、个人品牌思考、概念科普', icon: 'thoughts' },
+];
+
+let allArticles: Array<{ title: string; date: Date; summary: string; slug: string; category: string; tags: string[] }> = [];
+
+for (const cat of categories) {
+  try {
+    const entries = await getCollection(cat.slug as any);
+    for (const entry of entries) {
+      allArticles.push({
+        title: entry.data.title,
+        date: entry.data.date,
+        summary: entry.data.summary,
+        slug: entry.id,
+        category: cat.slug,
+        tags: entry.data.tags || [],
+      });
+    }
+  } catch (e) {
+    console.error(`[半路手记] 加载栏目 "${cat.slug}" 失败:`, e);
+  }
+}
+
+allArticles.sort((a, b) => b.date.getTime() - a.date.getTime());
+
+// 取全站最新一篇文章作为"最近更新"
+const latestArticle = allArticles.length > 0 ? allArticles[0] : null;
+---
+
+<BaseLayout title="首页">
+  <section class="hero">
+    <h1 class="hero-title">
+      <span class="accent">&gt;_</span> 半路手记
+    </h1>
+    <p class="hero-subtitle">
+      一个没有技术背景的人，用 AI 真刀真枪做出东西的全过程记录。不教原理，只说怎么干、干了什么、踩了什么坑。
+    </p>
+  </section>
+
+  <div class="card-grid">
+    {categories.map((cat) => {
+      const catArticles = allArticles
+        .filter((a) => a.category === cat.slug)
+        .slice(0, 3);
+      return (
+        <div class="category-card">
+          <div class="card-icon-wrap">
+            <svg class="card-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              {cat.icon === 'projects' && (
+                <>
+                  <rect x="3" y="3" width="7" height="7" rx="1" />
+                  <rect x="14" y="3" width="7" height="7" rx="1" />
+                  <rect x="3" y="14" width="7" height="7" rx="1" />
+                  <rect x="14" y="14" width="7" height="7" rx="1" />
+                </>
+              )}
+              {cat.icon === 'howto' && (
+                <>
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+                </>
+              )}
+              {cat.icon === 'pitfalls' && (
+                <>
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </>
+              )}
+              {cat.icon === 'thoughts' && (
+                <>
+                  <path d="M9 18h6" />
+                  <path d="M10 22h4" />
+                  <path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z" />
+                </>
+              )}
+            </svg>
+          </div>
+          <h2 class="card-title">
+            <a href={`/${cat.slug}/`}>{cat.name}</a>
+          </h2>
+          <p class="card-desc">{cat.desc}</p>
+          <ul class="card-articles">
+            {catArticles.map((article) => (
+              <li>
+                <a href={`/${cat.slug}/${article.slug}/`}>{article.title}</a>
+                <div class="meta">{article.date.toISOString().split('T')[0]}</div>
+              </li>
+            ))}
+          </ul>
+          {allArticles.filter((a) => a.category === cat.slug).length > 3 && (
+            <a href={`/${cat.slug}/`} class="card-more">查看全部 &rarr;</a>
+          )}
+        </div>
+      );
+    })}
+  </div>
+
+  {latestArticle && (
+    <section class="latest-update">
+      <h2 class="latest-label">最近更新</h2>
+      <a href={`/${latestArticle.category}/${latestArticle.slug}/`} class="latest-link">
+        {latestArticle.title}
+      </a>
+      <span class="latest-date">{latestArticle.date.toISOString().split('T')[0]}</span>
+    </section>
+  )}
+
+  <section class="banlu-walk-away-section">
+    <img class="banlu-static" src="/images/banlu/walk.png" alt="半路" />
+    <p>半路还在走，故事还没完</p>
+  </section>
+</BaseLayout>
