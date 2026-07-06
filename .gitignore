@@ -1,0 +1,16 @@
+# Build output
+.astro/
+dist/
+
+# Dependencies
+node_modules/
+
+# Tools (local scripts, logs, tokens)
+tools/
+
+# Portfolio samples
+src/content/portfolio/
+
+# OS files
+.DS_Store
+._*
