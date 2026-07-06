@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 36" width="120" height="36">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&amp;display=swap');
+      .sig { font-family: 'Ma Shan Zheng', cursive; font-size: 28px; fill: #64748b; }
+    </style>
+  </defs>
+  <text x="4" y="28" class="sig">安远</text>
+</svg>
